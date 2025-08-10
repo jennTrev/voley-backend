@@ -34,12 +34,12 @@ export const Jugador = sequelize.define(
       type: DataTypes.ENUM("armador", "opuesto", "central", "receptor", "libero"),
       allowNull: false,
     },
-    edad: {
-      type: DataTypes.INTEGER,
+    fecha_nacimiento: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
       validate: {
-        min: 16,
-        max: 35,
+        isDate: true,
+        isBefore: new Date().toISOString().split("T")[0], // No puede ser una fecha futura
       },
     },
     altura: {

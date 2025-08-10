@@ -1,5 +1,91 @@
 import { Jugador, Cuenta } from "../models/index.js"
 
+// 📌 Función para calcular la edad a partir de la fecha de nacimiento
+const calcularEdad = (fechaNacimiento) => {
+  const hoy = new Date()
+  const fechaNac = new Date(fechaNacimiento)
+  let edad = hoy.getFullYear() - fechaNac.getFullYear()
+  const mes = hoy.getMonth() - fechaNac.getMonth()
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--
+  }
+  return edad
+}
+
+// 📌 Crear jugador
+export const crearJugador = async (req, res) => {
+  try {
+    const {
+      nombres,
+      apellidos,
+      carrera,
+      posicion_principal,
+      fecha_nacimiento,
+      altura,
+      anos_experiencia_voley,
+      correo_institucional,
+      numero_celular,
+      cuentaId
+    } = req.body
+
+    // Validar fecha de nacimiento
+    if (!fecha_nacimiento || isNaN(Date.parse(fecha_nacimiento))) {
+      return res.status(400).json({
+        success: false,
+        message: "La fecha de nacimiento no es válida",
+      })
+    }
+
+    const hoy = new Date()
+    const fechaNac = new Date(fecha_nacimiento)
+    if (fechaNac > hoy) {
+      return res.status(400).json({
+        success: false,
+        message: "La fecha de nacimiento no puede ser futura",
+      })
+    }
+
+    // Calcular edad y validar rango
+    const edad = calcularEdad(fecha_nacimiento)
+    if (edad < 16 || edad > 35) {
+      return res.status(400).json({
+        success: false,
+        message: "La edad debe estar entre 16 y 35 años",
+      })
+    }
+
+    // Crear jugador
+    const nuevoJugador = await Jugador.create({
+      nombres,
+      apellidos,
+      carrera,
+      posicion_principal,
+      fecha_nacimiento,
+      altura,
+      anos_experiencia_voley,
+      correo_institucional,
+      numero_celular,
+      cuentaId
+    })
+
+    res.status(201).json({
+      success: true,
+      message: "Jugador creado exitosamente",
+      data: {
+        ...nuevoJugador.toJSON(),
+        edad
+      }
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    })
+  }
+}
+
+// 📌 Obtener todos los jugadores
 export const obtenerJugadores = async (req, res) => {
   try {
     const jugadores = await Jugador.findAll({
@@ -12,9 +98,14 @@ export const obtenerJugadores = async (req, res) => {
       ],
     })
 
+    const jugadoresConEdad = jugadores.map(j => ({
+      ...j.toJSON(),
+      edad: calcularEdad(j.fecha_nacimiento)
+    }))
+
     res.json({
       success: true,
-      data: jugadores,
+      data: jugadoresConEdad,
     })
   } catch (error) {
     res.status(500).json({
@@ -25,6 +116,7 @@ export const obtenerJugadores = async (req, res) => {
   }
 }
 
+// 📌 Obtener un jugador por ID
 export const obtenerJugador = async (req, res) => {
   try {
     const { id } = req.params
@@ -47,7 +139,6 @@ export const obtenerJugador = async (req, res) => {
       })
     }
 
-    // Verificar permisos: jugadores solo pueden ver su propia información
     if (req.usuario.rol === "jugador" && jugador.cuentaId !== req.usuario.id) {
       return res.status(403).json({
         success: false,
@@ -57,7 +148,10 @@ export const obtenerJugador = async (req, res) => {
 
     res.json({
       success: true,
-      data: jugador,
+      data: {
+        ...jugador.toJSON(),
+        edad: calcularEdad(jugador.fecha_nacimiento)
+      },
     })
   } catch (error) {
     res.status(500).json({
@@ -68,6 +162,7 @@ export const obtenerJugador = async (req, res) => {
   }
 }
 
+// 📌 Actualizar jugador
 export const actualizarJugador = async (req, res) => {
   try {
     const { id } = req.params
@@ -90,7 +185,6 @@ export const actualizarJugador = async (req, res) => {
       })
     }
 
-    // Verificar permisos: jugadores solo pueden actualizar su propia información
     if (req.usuario.rol === "jugador" && jugador.cuentaId !== req.usuario.id) {
       return res.status(403).json({
         success: false,
@@ -98,12 +192,31 @@ export const actualizarJugador = async (req, res) => {
       })
     }
 
+    if (req.body.fecha_nacimiento) {
+      if (isNaN(Date.parse(req.body.fecha_nacimiento))) {
+        return res.status(400).json({
+          success: false,
+          message: "La fecha de nacimiento no es válida",
+        })
+      }
+      const edad = calcularEdad(req.body.fecha_nacimiento)
+      if (edad < 16 || edad > 35) {
+        return res.status(400).json({
+          success: false,
+          message: "La edad debe estar entre 16 y 35 años",
+        })
+      }
+    }
+
     await jugador.update(req.body)
 
     res.json({
       success: true,
       message: "Jugador actualizado exitosamente",
-      data: jugador,
+      data: {
+        ...jugador.toJSON(),
+        edad: calcularEdad(jugador.fecha_nacimiento)
+      },
     })
   } catch (error) {
     res.status(500).json({
