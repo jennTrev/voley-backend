@@ -23,13 +23,10 @@ export const Entrenador = sequelize.define(
         len: [2, 100],
       },
     },
-    edad: {
-      type: DataTypes.INTEGER,
+    fecha_nacimiento: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
-      validate: {
-        min: 25,
-        max: 70,
-      },
+      // Puedes agregar validaciones personalizadas si quieres
     },
     anos_experiencia_voley: {
       type: DataTypes.INTEGER,
@@ -67,5 +64,5 @@ export const Entrenador = sequelize.define(
   {
     tableName: "entrenadores",
     timestamps: false,
-  },
+  }
 )
