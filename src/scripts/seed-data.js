@@ -15,7 +15,7 @@ async function seedData() {
     await Tecnico.create({
       nombres: "Carlos",
       apellidos: "Rodríguez",
-      edad: 45,
+      fecha_nacimiento: "1978-05-12", // Antes era edad: 45
       correo_institucional: "admin@universidad.edu",
       numero_celular: "987654321",
       cuentaId: cuentaTecnico.id,
@@ -31,7 +31,7 @@ async function seedData() {
     await Entrenador.create({
       nombres: "María",
       apellidos: "González",
-      edad: 35,
+      fecha_nacimiento: "1988-03-20", // Antes era edad: 35
       anos_experiencia_voley: 10,
       numero_celular: "987654322",
       correo_electronico: "coach@universidad.edu",
@@ -50,7 +50,7 @@ async function seedData() {
       apellidos: "Martínez",
       carrera: "Ingeniería de Sistemas",
       posicion_principal: "armador",
-      edad: 20,
+      fecha_nacimiento: "2003-09-15", // Antes era edad: 20
       altura: 1.75,
       anos_experiencia_voley: 5,
       correo_institucional: "ana.martinez@estudiante.edu",

@@ -23,12 +23,12 @@ export const Tecnico = sequelize.define(
         len: [2, 100],
       },
     },
-    edad: {
-      type: DataTypes.INTEGER,
+    fecha_nacimiento: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
       validate: {
-        min: 25,
-        max: 70,
+        isDate: true,
+        isBefore: new Date().toISOString().split("T")[0], // debe ser antes de hoy
       },
     },
     correo_institucional: {
@@ -59,5 +59,5 @@ export const Tecnico = sequelize.define(
   {
     tableName: "tecnicos",
     timestamps: false,
-  },
+  }
 )
