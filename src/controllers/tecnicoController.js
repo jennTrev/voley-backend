@@ -62,7 +62,6 @@ export const obtenerTecnico = async (req, res) => {
 
 export const crearTecnico = async (req, res) => {
   try {
-    // req.body debe contener fecha_nacimiento en formato "YYYY-MM-DD"
     const tecnico = await Tecnico.create(req.body)
 
     res.status(201).json({
@@ -101,7 +100,6 @@ export const actualizarTecnico = async (req, res) => {
       })
     }
 
-    // req.body puede incluir fecha_nacimiento para actualizarla
     await tecnico.update(req.body)
 
     res.json({
