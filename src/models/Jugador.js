@@ -88,3 +88,4 @@ export const Jugador = sequelize.define(
     timestamps: false,
   },
 )
+//cambioss
