@@ -25,8 +25,9 @@ export const login = async (req, res) => {
       success: true,
       message: "Inicio de sesión exitoso",
       data: {
-        usuario: cuenta.toJSON(),
-        token,
+        id: cuenta.id,
+        rol: cuenta.rol,
+        token, // ya generado
       },
     })
   } catch (error) {
@@ -37,6 +38,7 @@ export const login = async (req, res) => {
     })
   }
 }
+
 
 export const logout = async (req, res) => {
   try {
