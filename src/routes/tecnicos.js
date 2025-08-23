@@ -6,14 +6,11 @@ import {
   actualizarTecnico,
   eliminarTecnico,
 } from "../controllers/tecnicoController.js"
-import { autenticar, autorizar } from "../middlewares/auth.js"
 import { validarTecnico, validarId } from "../middlewares/validations.js"
 
 const router = Router()
 
-router.use(autenticar)
-router.use(autorizar("tecnico"))
-
+// 🔹 Rutas sin autenticación ni permisos
 router.get("/", obtenerTecnicos)
 router.get("/:id", validarId, obtenerTecnico)
 router.post("/", validarTecnico, crearTecnico)

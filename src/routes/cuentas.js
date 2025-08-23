@@ -1,13 +1,12 @@
 import { Router } from "express"
 import { obtenerCuentas, crearCuenta, actualizarCuenta, eliminarCuenta } from "../controllers/cuentaController.js"
-import { autenticar, autorizar } from "../middlewares/auth.js"
+import { autenticar } from "../middlewares/auth.js" // opcional, si quieres quitar autenticación
 import { validarCuenta, validarId } from "../middlewares/validations.js"
 
 const router = Router()
 
-router.use(autenticar)
-router.use(autorizar("tecnico"))
 
+// 🔹 Rutas sin permisos
 router.get("/", obtenerCuentas)
 router.post("/", validarCuenta, crearCuenta)
 router.put("/:id", validarId, actualizarCuenta)

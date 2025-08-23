@@ -32,7 +32,7 @@ export const validarJugador = [
   body("posicion_principal")
     .isIn(["armador", "opuesto", "central", "receptor", "libero"])
     .withMessage("Posición inválida"),
-  body("edad").isInt({ min: 16, max: 35 }).withMessage("La edad debe estar entre 16 y 35 años"),
+  body("fecha_nacimiento").isISO8601().withMessage("La fecha de nacimiento debe ser válida (YYYY-MM-DD)"),
   body("altura").isFloat({ min: 1.5, max: 2.2 }).withMessage("La altura debe estar entre 1.5 y 2.2 metros"),
   body("anos_experiencia_voley")
     .isInt({ min: 0, max: 20 })
@@ -48,7 +48,7 @@ export const validarJugador = [
 export const validarEntrenador = [
   body("nombres").isLength({ min: 2, max: 100 }).withMessage("Los nombres deben tener entre 2 y 100 caracteres"),
   body("apellidos").isLength({ min: 2, max: 100 }).withMessage("Los apellidos deben tener entre 2 y 100 caracteres"),
-  body("edad").isInt({ min: 25, max: 70 }).withMessage("La edad debe estar entre 25 y 70 años"),
+  body("fecha_nacimiento").isISO8601().withMessage("La fecha de nacimiento debe ser válida (YYYY-MM-DD)"),
   body("anos_experiencia_voley")
     .isInt({ min: 1, max: 40 })
     .withMessage("Los años de experiencia deben estar entre 1 y 40"),
@@ -63,7 +63,7 @@ export const validarEntrenador = [
 export const validarTecnico = [
   body("nombres").isLength({ min: 2, max: 100 }).withMessage("Los nombres deben tener entre 2 y 100 caracteres"),
   body("apellidos").isLength({ min: 2, max: 100 }).withMessage("Los apellidos deben tener entre 2 y 100 caracteres"),
-  body("edad").isInt({ min: 25, max: 70 }).withMessage("La edad debe estar entre 25 y 70 años"),
+  body("fecha_nacimiento").isISO8601().withMessage("La fecha de nacimiento debe ser válida (YYYY-MM-DD)"),
   body("correo_institucional").isEmail().withMessage("Debe ser un email válido"),
   body("numero_celular")
     .isLength({ min: 8, max: 15 })
