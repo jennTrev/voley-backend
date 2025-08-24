@@ -24,6 +24,39 @@ export const obtenerCuentas = async (req, res) => {
     })
   }
 }
+export const obtenerCuenta = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const cuenta = await Cuenta.findOne({
+      where: { id, activo: true },
+      include: [
+        { model: Jugador, as: "jugador" },
+        { model: Entrenador, as: "entrenador" },
+        { model: Tecnico, as: "tecnico" },
+      ],
+    })
+
+    if (!cuenta) {
+      return res.status(404).json({
+        success: false,
+        message: "Cuenta no encontrada",
+      })
+    }
+
+    res.json({
+      success: true,
+      data: cuenta,
+    })
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    })
+  }
+}
+
 
 export const crearCuenta = async (req, res) => {
   const transaction = await sequelize.transaction()
