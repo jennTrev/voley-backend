@@ -23,7 +23,7 @@ export const sendCommand = async (req, res) => {
 
     const channel = `esp-${deviceId}`;
     await pusher.trigger(channel, "command", {
-      message: comando,
+      command: comando,
       userId: userId || "sistema",
       timestamp: new Date().toISOString(),
     });
