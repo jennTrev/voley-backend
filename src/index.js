@@ -50,7 +50,7 @@ app.use("/api/cuentas", cuentasRoutes)
 app.use("/api/jugadores", jugadoresRoutes)
 app.use("/api/entrenadores", entrenadoresRoutes)
 app.use("/api/tecnicos", tecnicosRoutes)
-app.use("/api/pusher", tecnicosRoutes)
+app.use("/api/pusher", pusherRoutes)
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
