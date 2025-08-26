@@ -10,7 +10,7 @@ import cuentasRoutes from "./routes/cuentas.js"
 import jugadoresRoutes from "./routes/jugadores.js"
 import entrenadoresRoutes from "./routes/entrenadores.js"
 import tecnicosRoutes from "./routes/tecnicos.js"
-
+import pusherRoutes from "./routes/pusher.js"
 // Importar modelos para establecer asociaciones
 import "./models/index.js"
 
@@ -50,6 +50,7 @@ app.use("/api/cuentas", cuentasRoutes)
 app.use("/api/jugadores", jugadoresRoutes)
 app.use("/api/entrenadores", entrenadoresRoutes)
 app.use("/api/tecnicos", tecnicosRoutes)
+app.use("/api/pusher", tecnicosRoutes)
 
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
