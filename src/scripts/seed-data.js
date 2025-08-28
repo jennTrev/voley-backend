@@ -1,69 +1,71 @@
-import { connectDB } from "../config/database.js"
-import { Cuenta, Jugador, Entrenador, Tecnico } from "../models/index.js"
+import { sequelize } from "../config/database.js";
+import { Prueba } from "../models/Prueba.js";
 
-async function seedData() {
+// IDs de cuentas de tu base de datos
+const cuentas = [10, 3, 4, 9]; // cuentaId de las cuentas
+
+const seedPruebas = async () => {
   try {
-    await connectDB()
+    await sequelize.sync({ force: false }); // solo crea la tabla si no existe
 
-    // Crear técnico admin
-    const cuentaTecnico = await Cuenta.create({
-      usuario: "admin",
-      contraseña: "admin123",
-      rol: "tecnico",
-    })
+    const pruebasData = [];
 
-    await Tecnico.create({
-      nombres: "Carlos",
-      apellidos: "Rodríguez",
-      fecha_nacimiento: "1978-05-12", // Antes era edad: 45
-      correo_institucional: "admin@universidad.edu",
-      numero_celular: "987654321",
-      cuentaId: cuentaTecnico.id,
-    })
+    // Generar pruebas secuenciales
+    cuentas.forEach((cuentaId) => {
+      const aciertos = Math.floor(Math.random() * 10) + 5; // 5 a 14 aciertos
+      const errores = Math.floor(Math.random() * 5); // 0 a 4 errores
+      pruebasData.push({
+        tipo: "secuencial",
+        cuentaId,
+        tiempo_inicio: new Date(Date.now() - 60000), // 1 min antes
+        tiempo_fin: new Date(),
+        cantidad_aciertos: aciertos,
+        cantidad_errores: errores,
+        cantidad_intentos: aciertos + errores,
+        estado: "finalizada", // Establecer estado como "finalizada"
+      });
+    });
 
-    // Crear entrenador
-    const cuentaEntrenador = await Cuenta.create({
-      usuario: "coach01",
-      contraseña: "coach123",
-      rol: "entrenador",
-    })
+    // Generar pruebas aleatorias
+    cuentas.forEach((cuentaId) => {
+      const aciertos = Math.floor(Math.random() * 15) + 5; // 5 a 19
+      const errores = Math.floor(Math.random() * 5); // 0 a 4
+      pruebasData.push({
+        tipo: "aleatorio",
+        cuentaId,
+        tiempo_inicio: new Date(Date.now() - 180000), // 3 minutos antes
+        tiempo_fin: new Date(),
+        cantidad_aciertos: aciertos,
+        cantidad_errores: errores,
+        cantidad_intentos: aciertos + errores,
+        estado: "finalizada", // Establecer estado como "finalizada"
+      });
+    });
 
-    await Entrenador.create({
-      nombres: "María",
-      apellidos: "González",
-      fecha_nacimiento: "1988-03-20", // Antes era edad: 35
-      anos_experiencia_voley: 10,
-      numero_celular: "987654322",
-      correo_electronico: "coach@universidad.edu",
-      cuentaId: cuentaEntrenador.id,
-    })
+    // Generar pruebas manuales
+    cuentas.forEach((cuentaId) => {
+      const aciertos = Math.floor(Math.random() * 10) + 5;
+      const errores = Math.floor(Math.random() * 5);
+      pruebasData.push({
+        tipo: "manual",
+        cuentaId,
+        tiempo_inicio: new Date(Date.now() - 600000), // 10 min antes
+        tiempo_fin: new Date(),
+        cantidad_aciertos: aciertos,
+        cantidad_errores: errores,
+        cantidad_intentos: aciertos + errores,
+        estado: "finalizada", // Establecer estado como "finalizada"
+      });
+    });
 
-    // Crear jugador
-    const cuentaJugador = await Cuenta.create({
-      usuario: "player01",
-      contraseña: "player123",
-      rol: "jugador",
-    })
-
-    await Jugador.create({
-      nombres: "Ana",
-      apellidos: "Martínez",
-      carrera: "Ingeniería de Sistemas",
-      posicion_principal: "armador",
-      fecha_nacimiento: "2003-09-15", // Antes era edad: 20
-      altura: 1.75,
-      anos_experiencia_voley: 5,
-      correo_institucional: "ana.martinez@estudiante.edu",
-      numero_celular: "987654323",
-      cuentaId: cuentaJugador.id,
-    })
-
-    console.log("✅ Datos de prueba creados exitosamente")
-    process.exit(0)
+    // Insertar en la base de datos
+    await Prueba.bulkCreate(pruebasData);
+    console.log("Pruebas simuladas creadas exitosamente");
+    process.exit();
   } catch (error) {
-    console.error("❌ Error al crear datos de prueba:", error)
-    process.exit(1)
+    console.error("Error al crear pruebas simuladas:", error);
+    process.exit(1);
   }
-}
+};
 
-seedData()
+seedPruebas();
