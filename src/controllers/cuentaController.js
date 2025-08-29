@@ -205,3 +205,36 @@ export const eliminarCuenta = async (req, res) => {
     })
   }
 }
+export const obtenerPerfil = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const cuenta = await Cuenta.findOne({
+      where: { id, activo: true },
+      attributes: { exclude: ["contraseña"] }, // Excluir la contraseña
+      include: [
+        { model: Jugador, as: "jugador" },
+        { model: Entrenador, as: "entrenador" },
+        { model: Tecnico, as: "tecnico" },
+      ],
+    });
+
+    if (!cuenta) {
+      return res.status(404).json({
+        success: false,
+        message: "Cuenta no encontrada",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: cuenta,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
