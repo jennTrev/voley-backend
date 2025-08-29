@@ -12,6 +12,7 @@ import entrenadoresRoutes from "./routes/entrenadores.js"
 import tecnicosRoutes from "./routes/tecnicos.js"
 import pusherRoutes from "./routes/pusher.js"
 import pruebaRoutes from "./routes/pruebas.js"
+import rankingRoutes from "./routes/ranking.js"
 // Importar modelos para establecer asociaciones
 import "./models/index.js"
 
@@ -53,6 +54,8 @@ app.use("/api/entrenadores", entrenadoresRoutes)
 app.use("/api/tecnicos", tecnicosRoutes)
 app.use("/api/pusher", pusherRoutes)
 app.use("/api/pruebas", pruebaRoutes)
+app.use("/api/ranking", rankingRoutes)
+
 
 
 // Middleware de manejo de errores global
