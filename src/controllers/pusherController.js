@@ -1,6 +1,3 @@
-// controllers/pusherController.js
-import Pusher from 'pusher';
-
 const Pusher = require('pusher');
 
 const pusher = new Pusher({
