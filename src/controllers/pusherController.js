@@ -1,10 +1,12 @@
 // controllers/pusherController.js
 import Pusher from 'pusher';
 
+const Pusher = require('pusher');
+
 const pusher = new Pusher({
-  appId: 'TU_APP_ID',
+  appId: '1978430',
   key: '4f85ef5c792df94cebc9',
-  secret: 'TU_APP_SECRET',
+  secret: '351840445857a008668f',
   cluster: 'us2',
   useTLS: true
 });
