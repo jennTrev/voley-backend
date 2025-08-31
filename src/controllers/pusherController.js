@@ -11,38 +11,21 @@ const pusher = new Pusher({
 
 export const sendCommand = async (req, res) => {
   try {
-    const { comando, deviceId, userId } = req.body;
+    const { deviceId, command } = req.body;
 
-    if (!comando) {
-      return res.status(400).json({ message: "El comando es requerido" });
+    if (!deviceId || !command) {
+      return res.status(400).json({ error: "Faltan parámetros" });
     }
 
-    if (!deviceId) {
-      return res.status(400).json({ message: "El deviceId es requerido" });
-    }
-
-    const channel = `esp-${deviceId}`;
-    await pusher.trigger(channel, "command", {
-      command: comando,
-      userId: userId || "sistema",
-      timestamp: new Date().toISOString(),
+    // 🔹 Enviamos el comando al canal privado del dispositivo
+    await pusher.trigger(`private-device-${deviceId}`, "command", {
+      command: command,
+      from: "server"
     });
 
-    console.log(
-      `Comando enviado a ESP-${deviceId}: ${comando} por usuario ID: ${userId || "sistema"}`
-    );
-
-    return res.json({
-      success: true,
-      message: `Comando "${comando}" enviado exitosamente a ESP-${deviceId}`,
-    });
+    res.json({ success: true, message: `Comando '${command}' enviado al dispositivo ${deviceId}` });
   } catch (error) {
-    console.error("Error al enviar comando a ESP32:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error al enviar comando a ESP32",
-      error: error instanceof Error ? error.message : "Error desconocido",
-    });
+    console.error("Error enviando comando:", error);
+    res.status(500).json({ error: "Error enviando comando" });
   }
 };
-//ss
