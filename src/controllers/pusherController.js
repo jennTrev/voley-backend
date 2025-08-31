@@ -26,6 +26,16 @@ export const pusherAuth = (req, res) => {
     res.status(500).json({ error: 'Error autenticando Pusher' });
   }
 };
+// Agrega esto a tu controllers/pusherController.js
+export const testConnection = (req, res) => {
+  res.json({ 
+    success: true,
+    message: "Conexión exitosa desde ESP32",
+    timestamp: new Date().toISOString(),
+    device: "ESP32"
+  });
+};
+
 
 // Controlador para enviar comando al dispositivo vía Pusher
 export const sendCommand = async (req, res) => {
@@ -38,7 +48,7 @@ export const sendCommand = async (req, res) => {
 
     const channel = `private-device-${deviceId}`;
 
-    await pusher.trigger(channel, 'command', {
+    await pusher.trigger(channel, 'client-command', {
       command: command,
       from: 'server'
     });
