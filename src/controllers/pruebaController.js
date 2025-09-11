@@ -12,8 +12,6 @@ const pusher = new Pusher({
   cluster: "us2",
   useTLS: true,
 });
-
-// Función auxiliar para enviar comandos a todos los ESP
 const enviarComandoATodos = async (comando, deviceIds = [1, 2, 3, 4, 5], userId = "sistema") => {
   for (const id of deviceIds) {
     const channel = `esp-${id}`;
@@ -26,40 +24,23 @@ const enviarComandoATodos = async (comando, deviceIds = [1, 2, 3, 4, 5], userId 
   }
 };
 
+// ------------------ CONTROLADORES ------------------ //
+
 // Iniciar prueba
 export const iniciarPrueba = async (req, res) => {
   try {
     const { tipo, cuentaId } = req.body;
+    if (!tipo || !cuentaId) return res.status(400).json({ success: false, message: "Tipo de prueba y cuentaId son requeridos" });
 
-    if (!tipo || !cuentaId) {
-      return res.status(400).json({ success: false, message: "Tipo de prueba y cuentaId son requeridos" });
-    }
-
-    // Crear la prueba con estado "en_curso"
     const nuevaPrueba = await Prueba.create({
       tipo,
       cuentaId,
       tiempo_inicio: new Date(),
-      estado: "en_curso", // Establecer estado como "en_curso"
+      estado: "en_curso",
     });
 
-    // Definir comando inicial según tipo de prueba
-    let comandoInicial = "";
-    switch (tipo) {
-      case "secuencial":
-        comandoInicial = "S"; // modo secuencial
-        break;
-      case "aleatorio":
-        comandoInicial = "R"; // modo aleatorio
-        break;
-      case "manual":
-        comandoInicial = "M"; // modo manual
-        break;
-      default:
-        comandoInicial = "X";
-    }
+    let comandoInicial = tipo === "secuencial" ? "S" : tipo === "aleatorio" ? "R" : tipo === "manual" ? "M" : "X";
 
-    // Enviar comando a todos los microcontroladores
     await enviarComandoATodos(comandoInicial, [1, 2, 3, 4, 5], cuentaId);
 
     res.json({ success: true, data: nuevaPrueba, message: `Prueba iniciada con comando "${comandoInicial}"` });
@@ -73,26 +54,18 @@ export const iniciarPrueba = async (req, res) => {
 export const finalizarPrueba = async (req, res) => {
   try {
     const { id } = req.params;
-    const datos = req.body; // aciertos, errores, tiempo_final, cantidad_intentos, ejercicios_realizados, etc.
+    const datos = req.body;
 
     const prueba = await Prueba.findByPk(id);
-    if (!prueba) {
-      return res.status(404).json({ success: false, message: "Prueba no encontrada" });
-    }
+    if (!prueba) return res.status(404).json({ success: false, message: "Prueba no encontrada" });
 
-    // Enviar comando "F" para indicar que la prueba finalizó
     await enviarComandoATodos("F", [1, 2, 3, 4, 5], prueba.cuentaId);
 
-    // Actualizar campos según tipo de prueba
     if (prueba.tipo === "secuencial" || prueba.tipo === "manual") {
       datos.tiempo_fin = datos.tiempo_fin || new Date();
     }
 
-    // Actualizar el estado a "finalizada"
-    await prueba.update({
-      ...datos,
-      estado: "finalizada", // Establecer estado como "finalizada"
-    });
+    await prueba.update({ ...datos, estado: "finalizada" });
 
     res.json({ success: true, data: prueba, message: "Prueba finalizada correctamente" });
   } catch (error) {
@@ -105,22 +78,42 @@ export const finalizarPrueba = async (req, res) => {
 export const obtenerPruebas = async (req, res) => {
   try {
     const pruebas = await Prueba.findAll({
-      where: { estado: "finalizada" }, // Filtrar solo pruebas finalizadas
+      where: { estado: "finalizada" },
       include: [
         {
           model: Cuenta,
-          attributes: { exclude: ["password"] },
+          as: "cuenta",
+          attributes: { exclude: ["contraseña", "token"] },
           include: [
-            { model: Jugador, as: "jugador" },
-            { model: Entrenador, as: "entrenador" },
-            { model: Tecnico, as: "tecnico" },
+            { model: Jugador, as: "jugador", attributes: ["nombres", "apellidos"] },
+            { model: Entrenador, as: "entrenador", attributes: ["nombres", "apellidos"] },
+            { model: Tecnico, as: "tecnico", attributes: ["nombres", "apellidos"] },
           ],
         },
       ],
-      order: [["fecha", "DESC"]],
+      order: [["tiempo_fin", "DESC"]],
     });
 
-    res.json({ success: true, data: pruebas });
+    const pruebasFormateadas = pruebas.map((prueba) => {
+      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores } = prueba;
+      const nombre = prueba.cuenta.rol === "jugador"
+        ? `${prueba.cuenta.jugador.nombres} ${prueba.cuenta.jugador.apellidos}`
+        : prueba.cuenta.rol === "entrenador"
+          ? `${prueba.cuenta.entrenador.nombres} ${prueba.cuenta.entrenador.apellidos}`
+          : `${prueba.cuenta.tecnico.nombres} ${prueba.cuenta.tecnico.apellidos}`;
+
+      return {
+        id: prueba.id,
+        tipo,
+        tiempo_inicio,
+        tiempo_fin,
+        cantidad_aciertos,
+        cantidad_errores,
+        jugador: nombre,
+      };
+    });
+
+    res.json({ success: true, data: pruebasFormateadas });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error al obtener pruebas", error: error.message });
@@ -133,22 +126,42 @@ export const obtenerPruebasPorUsuario = async (req, res) => {
     const { cuentaId } = req.params;
 
     const pruebas = await Prueba.findAll({
-      where: { cuentaId, estado: "finalizada" }, // Filtrar solo pruebas finalizadas por cuentaId
+      where: { cuentaId, estado: "finalizada" },
       include: [
         {
           model: Cuenta,
-          attributes: { exclude: ["password"] },
+          as: "cuenta",
+          attributes: { exclude: ["contraseña", "token"] },
           include: [
-            { model: Jugador, as: "jugador" },
-            { model: Entrenador, as: "entrenador" },
-            { model: Tecnico, as: "tecnico" },
+            { model: Jugador, as: "jugador", attributes: ["nombres", "apellidos"] },
+            { model: Entrenador, as: "entrenador", attributes: ["nombres", "apellidos"] },
+            { model: Tecnico, as: "tecnico", attributes: ["nombres", "apellidos"] },
           ],
         },
       ],
-      order: [["fecha", "DESC"]],
+      order: [["tiempo_fin", "DESC"]],
     });
 
-    res.json({ success: true, data: pruebas });
+    const pruebasFormateadas = pruebas.map((prueba) => {
+      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores } = prueba;
+      const nombre = prueba.cuenta.rol === "jugador"
+        ? `${prueba.cuenta.jugador.nombres} ${prueba.cuenta.jugador.apellidos}`
+        : prueba.cuenta.rol === "entrenador"
+          ? `${prueba.cuenta.entrenador.nombres} ${prueba.cuenta.entrenador.apellidos}`
+          : `${prueba.cuenta.tecnico.nombres} ${prueba.cuenta.tecnico.apellidos}`;
+
+      return {
+        id: prueba.id,
+        tipo,
+        tiempo_inicio,
+        tiempo_fin,
+        cantidad_aciertos,
+        cantidad_errores,
+        jugador: nombre,
+      };
+    });
+
+    res.json({ success: true, data: pruebasFormateadas });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Error al obtener pruebas por usuario", error: error.message });
@@ -159,11 +172,8 @@ export const obtenerPruebasPorUsuario = async (req, res) => {
 export const eliminarPrueba = async (req, res) => {
   try {
     const { id } = req.params;
-
     const prueba = await Prueba.findByPk(id);
-    if (!prueba) {
-      return res.status(404).json({ success: false, message: "Prueba no encontrada" });
-    }
+    if (!prueba) return res.status(404).json({ success: false, message: "Prueba no encontrada" });
 
     await prueba.destroy();
     res.json({ success: true, message: "Prueba eliminada correctamente" });

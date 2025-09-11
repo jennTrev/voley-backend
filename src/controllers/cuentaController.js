@@ -238,3 +238,71 @@ export const obtenerPerfil = async (req, res) => {
     });
   }
 };
+export const actualizarPerfil = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { id } = req.params;
+    const { usuario, ...datosPersonales } = req.body;
+
+    // Buscar cuenta
+    const cuenta = await Cuenta.findOne({
+      where: { id, activo: true },
+      transaction,
+    });
+
+    if (!cuenta) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Cuenta no encontrada",
+      });
+    }
+
+    // Actualizar solo usuario (no contraseña)
+    if (usuario) {
+      await cuenta.update({ usuario }, { transaction });
+    }
+
+    // Actualizar datos personales según el rol
+    const modeloMap = {
+      jugador: Jugador,
+      entrenador: Entrenador,
+      tecnico: Tecnico,
+    };
+
+    const Modelo = modeloMap[cuenta.rol];
+    if (Modelo && Object.keys(datosPersonales).length > 0) {
+      await Modelo.update(datosPersonales, {
+        where: { cuentaId: cuenta.id },
+        transaction,
+      });
+    }
+
+    await transaction.commit();
+
+    // Volver a obtener el perfil actualizado (excluyendo contraseña)
+    const perfilActualizado = await Cuenta.findOne({
+      where: { id: cuenta.id, activo: true },
+      attributes: { exclude: ["contraseña"] },
+      include: [
+        { model: Jugador, as: "jugador" },
+        { model: Entrenador, as: "entrenador" },
+        { model: Tecnico, as: "tecnico" },
+      ],
+    });
+
+    res.json({
+      success: true,
+      message: "Perfil actualizado exitosamente",
+      data: perfilActualizado,
+    });
+  } catch (error) {
+    await transaction.rollback();
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor",
+      error: error.message,
+    });
+  }
+};
