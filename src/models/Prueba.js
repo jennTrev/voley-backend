@@ -15,7 +15,7 @@ export const Prueba = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "cuentas", // referencia a la tabla cuentas
+        model: "cuentas",
         key: "id",
       },
     },
@@ -25,33 +25,25 @@ export const Prueba = sequelize.define(
       allowNull: false,
     },
 
-    // datos comunes
     cantidad_intentos: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
     cantidad_aciertos: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
     cantidad_errores: {
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
-      validate: {
-        min: 0,
-      },
+      validate: { min: 0 },
     },
 
-    // tiempos (manual y secuencial)
     tiempo_inicio: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -61,7 +53,13 @@ export const Prueba = sequelize.define(
       allowNull: true,
     },
 
-    // estado de la prueba
+    // Nueva columna fecha
+    fecha: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: DataTypes.NOW, // si quieres que se llene automáticamente con la fecha de creación
+    },
+
     estado: {
       type: DataTypes.ENUM("pendiente", "en_curso", "finalizada"),
       allowNull: false,
@@ -69,7 +67,7 @@ export const Prueba = sequelize.define(
     },
   },
   {
-    tableName: "pruebas", // nombre de la tabla
-    timestamps: false, // sin createdAt/updatedAt automáticos
+    tableName: "pruebas",
+    timestamps: false,
   }
 );

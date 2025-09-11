@@ -12,6 +12,7 @@ const pusher = new Pusher({
   cluster: "us2",
   useTLS: true,
 });
+
 const enviarComandoATodos = async (comando, deviceIds = [1, 2, 3, 4, 5], userId = "sistema") => {
   for (const id of deviceIds) {
     const channel = `esp-${id}`;
@@ -30,12 +31,14 @@ const enviarComandoATodos = async (comando, deviceIds = [1, 2, 3, 4, 5], userId 
 export const iniciarPrueba = async (req, res) => {
   try {
     const { tipo, cuentaId } = req.body;
-    if (!tipo || !cuentaId) return res.status(400).json({ success: false, message: "Tipo de prueba y cuentaId son requeridos" });
+    if (!tipo || !cuentaId)
+      return res.status(400).json({ success: false, message: "Tipo de prueba y cuentaId son requeridos" });
 
     const nuevaPrueba = await Prueba.create({
       tipo,
       cuentaId,
       tiempo_inicio: new Date(),
+      fecha: new Date(), // ✅ agregar fecha al crear
       estado: "en_curso",
     });
 
@@ -95,7 +98,7 @@ export const obtenerPruebas = async (req, res) => {
     });
 
     const pruebasFormateadas = pruebas.map((prueba) => {
-      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores } = prueba;
+      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores, fecha } = prueba;
       const nombre = prueba.cuenta.rol === "jugador"
         ? `${prueba.cuenta.jugador.nombres} ${prueba.cuenta.jugador.apellidos}`
         : prueba.cuenta.rol === "entrenador"
@@ -105,6 +108,7 @@ export const obtenerPruebas = async (req, res) => {
       return {
         id: prueba.id,
         tipo,
+        fecha, // ✅ incluir fecha
         tiempo_inicio,
         tiempo_fin,
         cantidad_aciertos,
@@ -143,7 +147,7 @@ export const obtenerPruebasPorUsuario = async (req, res) => {
     });
 
     const pruebasFormateadas = pruebas.map((prueba) => {
-      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores } = prueba;
+      const { tipo, tiempo_inicio, tiempo_fin, cantidad_aciertos, cantidad_errores, fecha } = prueba;
       const nombre = prueba.cuenta.rol === "jugador"
         ? `${prueba.cuenta.jugador.nombres} ${prueba.cuenta.jugador.apellidos}`
         : prueba.cuenta.rol === "entrenador"
@@ -153,6 +157,7 @@ export const obtenerPruebasPorUsuario = async (req, res) => {
       return {
         id: prueba.id,
         tipo,
+        fecha, // ✅ incluir fecha
         tiempo_inicio,
         tiempo_fin,
         cantidad_aciertos,
