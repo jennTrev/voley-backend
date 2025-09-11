@@ -16,12 +16,35 @@ const pusher = new Pusher({
 const enviarComandoATodos = async (comando, deviceIds = [1, 2, 3, 4, 5], userId = "sistema") => {
   for (const id of deviceIds) {
     const channel = `esp-${id}`;
-    await pusher.trigger(channel, "command", {
+    await pusher.trigger(channel, "command", {  // <-- Cambiado aquí
       command: comando,
       userId,
       timestamp: new Date().toISOString(),
     });
     console.log(`Comando "${comando}" enviado a ESP-${id} por usuario ${userId}`);
+  }
+};
+
+// Controlador para enviar comando al dispositivo vía Pusher
+export const sendCommand = async (req, res) => {
+  try {
+    const { deviceId, command } = req.body;
+
+    if (!deviceId || !command) {
+      return res.status(400).json({ error: 'Faltan parámetros' });
+    }
+
+    const channel = `private-device-${deviceId}`;
+
+    await pusher.trigger(channel, 'command', {  // <-- Cambiado aquí
+      command: command,
+      from: 'server'
+    });
+
+    res.json({ success: true, message: `Comando '${command}' enviado al dispositivo ${deviceId}` });
+  } catch (error) {
+    console.error('Error enviando comando:', error);
+    res.status(500).json({ error: 'Error enviando comando' });
   }
 };
 
@@ -38,13 +61,22 @@ export const iniciarPrueba = async (req, res) => {
       tipo,
       cuentaId,
       tiempo_inicio: new Date(),
-      fecha: new Date(), // ✅ agregar fecha al crear
+      fecha: new Date(),
       estado: "en_curso",
     });
 
-    let comandoInicial = tipo === "secuencial" ? "S" : tipo === "aleatorio" ? "R" : tipo === "manual" ? "M" : "X";
+    // Determinar comando inicial según tipo
+    let comandoInicial = tipo === "secuencial" ? "ON" : tipo === "aleatorio" ? "R" : tipo === "manual" ? "M" : "X";
 
-    await enviarComandoATodos(comandoInicial, [1, 2, 3, 4, 5], cuentaId);
+    // Enviar comando a los dispositivos (IDs 1 a 5 por ejemplo)
+    for (let deviceId = 1; deviceId <= 5; deviceId++) {
+      const channel = `private-device-${deviceId}`;
+      await pusher.trigger(channel, 'command', {  // <-- Cambiado aquí
+        command: comandoInicial,
+        from: 'server'
+      });
+      console.log(`Comando "${comandoInicial}" enviado al dispositivo ${deviceId}`);
+    }
 
     res.json({ success: true, data: nuevaPrueba, message: `Prueba iniciada con comando "${comandoInicial}"` });
   } catch (error) {
@@ -108,7 +140,7 @@ export const obtenerPruebas = async (req, res) => {
       return {
         id: prueba.id,
         tipo,
-        fecha, // ✅ incluir fecha
+        fecha,
         tiempo_inicio,
         tiempo_fin,
         cantidad_aciertos,
@@ -157,7 +189,7 @@ export const obtenerPruebasPorUsuario = async (req, res) => {
       return {
         id: prueba.id,
         tipo,
-        fecha, // ✅ incluir fecha
+        fecha,
         tiempo_inicio,
         tiempo_fin,
         cantidad_aciertos,
