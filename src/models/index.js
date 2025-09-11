@@ -2,6 +2,7 @@ import { Cuenta } from "./Cuenta.js"
 import { Jugador } from "./Jugador.js"
 import { Entrenador } from "./Entrenador.js"
 import { Tecnico } from "./Tecnico.js"
+import { Prueba } from "./Prueba.js"
 
 // Definir asociaciones
 Cuenta.hasOne(Jugador, { foreignKey: "cuentaId", as: "jugador" })
@@ -12,4 +13,8 @@ Jugador.belongsTo(Cuenta, { foreignKey: "cuentaId", as: "cuenta" })
 Entrenador.belongsTo(Cuenta, { foreignKey: "cuentaId", as: "cuenta" })
 Tecnico.belongsTo(Cuenta, { foreignKey: "cuentaId", as: "cuenta" })
 
-export { Cuenta, Jugador, Entrenador, Tecnico }
+// 🔹 Relación Cuenta ↔ Prueba
+Cuenta.hasMany(Prueba, { foreignKey: "cuentaId", as: "pruebas" })
+Prueba.belongsTo(Cuenta, { foreignKey: "cuentaId", as: "cuenta" })
+
+export { Cuenta, Jugador, Entrenador, Tecnico, Prueba }
