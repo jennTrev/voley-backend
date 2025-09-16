@@ -69,7 +69,7 @@ export const iniciarPrueba = async (req, res) => {
     })
 
 
-    res.json({ success: true, data: nuevaPrueba, message: `Prueba iniciada con comando "${comandoInicial}"` })
+    res.json({ success: true, data: nuevaPrueba, message: `Prueba iniciada ` })
   } catch (error) {
     console.error(error)
     res.status(500).json({ success: false, message: "Error al iniciar la prueba", error: error.message })
