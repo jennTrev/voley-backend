@@ -68,19 +68,6 @@ export const iniciarPrueba = async (req, res) => {
       estado: "en_curso",
     })
 
-    // Determinar comando inicial según tipo
-    const comandoInicial = tipo === "secuencial" ? "ON" : tipo === "aleatorio" ? "R" : tipo === "manual" ? "M" : "X"
-
-    // Enviar comando a los dispositivos con deviceIds con prefijo "ESP-"
-    const deviceIds = ["ESP-1", "ESP-2", "ESP-3", "ESP-4", "ESP-5"];
-    for (const deviceId of deviceIds) {
-      const channel = `private-device-${deviceId}`
-      await pusher.trigger(channel, "client-command", {
-        command: comandoInicial,
-        from: "server",
-      })
-      console.log(`Comando "${comandoInicial}" enviado al dispositivo ${deviceId}`)
-    }
 
     res.json({ success: true, data: nuevaPrueba, message: `Prueba iniciada con comando "${comandoInicial}"` })
   } catch (error) {
@@ -98,9 +85,7 @@ export const finalizarPrueba = async (req, res) => {
     const prueba = await Prueba.findByPk(id)
     if (!prueba) return res.status(404).json({ success: false, message: "Prueba no encontrada" })
 
-    // Enviar comando "F" a todos los dispositivos con prefijo "ESP-"
-    await enviarComandoATodos("F", ["ESP-1", "ESP-2", "ESP-3", "ESP-4", "ESP-5"], prueba.cuentaId)
-
+    
     if (prueba.tipo === "secuencial" || prueba.tipo === "manual") {
       datos.tiempo_fin = datos.tiempo_fin || new Date()
     }
