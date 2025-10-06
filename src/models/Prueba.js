@@ -10,21 +10,15 @@ export const Prueba = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-
     cuentaId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "cuentas",
-        key: "id",
-      },
+      references: { model: "cuentas", key: "id" },
     },
-
     tipo: {
       type: DataTypes.ENUM("manual", "secuencial", "aleatorio"),
       allowNull: false,
     },
-
     cantidad_intentos: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -43,7 +37,6 @@ export const Prueba = sequelize.define(
       defaultValue: 0,
       validate: { min: 0 },
     },
-
     tiempo_inicio: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -52,14 +45,11 @@ export const Prueba = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
-
-    // Nueva columna fecha
     fecha: {
       type: DataTypes.DATE,
       allowNull: true,
-      defaultValue: DataTypes.NOW, // si quieres que se llene automáticamente con la fecha de creación
+      defaultValue: DataTypes.NOW,
     },
-
     estado: {
       type: DataTypes.ENUM("pendiente", "en_curso", "finalizada"),
       allowNull: false,

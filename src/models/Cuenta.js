@@ -1,6 +1,7 @@
-import { DataTypes } from "sequelize"
-import { sequelize } from "../config/database.js"
-import bcrypt from "bcrypt"
+// models/Cuenta.js
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/database.js";
+import bcrypt from "bcrypt";
 
 export const Cuenta = sequelize.define(
   "cuentas",
@@ -14,16 +15,12 @@ export const Cuenta = sequelize.define(
       type: DataTypes.STRING(50),
       allowNull: false,
       unique: true,
-      validate: {
-        len: [3, 50],
-      },
+      validate: { len: [3, 50] },
     },
     contraseña: {
       type: DataTypes.STRING(255),
       allowNull: false,
-      validate: {
-        len: [6, 255],
-      },
+      validate: { len: [6, 255] },
     },
     rol: {
       type: DataTypes.ENUM("jugador", "entrenador", "tecnico"),
@@ -44,29 +41,27 @@ export const Cuenta = sequelize.define(
     hooks: {
       beforeCreate: async (cuenta) => {
         if (cuenta.contraseña) {
-          const rounds = Number.parseInt(process.env.BCRYPT_ROUNDS) || 12
-          cuenta.contraseña = await bcrypt.hash(cuenta.contraseña, rounds)
+          const rounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+          cuenta.contraseña = await bcrypt.hash(cuenta.contraseña, rounds);
         }
       },
       beforeUpdate: async (cuenta) => {
         if (cuenta.changed("contraseña")) {
-          const rounds = Number.parseInt(process.env.BCRYPT_ROUNDS) || 12
-          cuenta.contraseña = await bcrypt.hash(cuenta.contraseña, rounds)
+          const rounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+          cuenta.contraseña = await bcrypt.hash(cuenta.contraseña, rounds);
         }
       },
     },
-  },
-)
+  }
+);
 
-// Método para verificar contraseña
-Cuenta.prototype.verificarContrasena = async function (contraseña) {
-  return await bcrypt.compare(contraseña, this.contraseña)
-}
+Cuenta.prototype.verificarContrasena = async function (pass) {
+  return bcrypt.compare(pass, this.contraseña);
+};
 
-// Método toJSON para excluir campos sensibles
 Cuenta.prototype.toJSON = function () {
-  const values = { ...this.get() }
-  delete values.contraseña
-  delete values.token
-  return values
-}
+  const values = { ...this.get() };
+  delete values.contraseña;
+  delete values.token;
+  return values;
+};

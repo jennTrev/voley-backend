@@ -1,5 +1,6 @@
-import { DataTypes } from "sequelize"
-import { sequelize } from "../config/database.js"
+// models/Entrenador.js
+import { DataTypes } from "sequelize";
+import { sequelize } from "../config/database.js";
 
 export const Entrenador = sequelize.define(
   "entrenadores",
@@ -12,57 +13,49 @@ export const Entrenador = sequelize.define(
     nombres: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      validate: {
-        len: [2, 100],
-      },
+      validate: { len: [2, 100] },
     },
     apellidos: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      validate: {
-        len: [2, 100],
-      },
+      validate: { len: [2, 100] },
     },
     fecha_nacimiento: {
       type: DataTypes.DATEONLY,
       allowNull: false,
-      // Puedes agregar validaciones personalizadas si quieres
+      validate: {
+        isDate: true,
+        isBefore: new Date().toISOString().split("T")[0],
+      },
     },
     anos_experiencia_voley: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        min: 1,
-        max: 40,
-      },
+      validate: { min: 1, max: 40 },
     },
     numero_celular: {
       type: DataTypes.STRING(15),
       allowNull: false,
-      validate: {
-        len: [8, 15],
-        isNumeric: true,
-      },
+      validate: { len: [8, 15], isNumeric: true },
     },
     correo_electronico: {
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
-      validate: {
-        isEmail: true,
-      },
+      validate: { isEmail: true },
+    },
+    imagen: {
+      type: DataTypes.BLOB("long"),
+      allowNull: true,
     },
     cuentaId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: "cuentas",
-        key: "id",
-      },
+      references: { model: "cuentas", key: "id" },
     },
   },
   {
     tableName: "entrenadores",
     timestamps: false,
   }
-)
+);

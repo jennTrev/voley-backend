@@ -1,16 +1,17 @@
-import { Jugador, Cuenta } from "../models/index.js"
+// controllers/JugadorController.js
+import { Jugador, Cuenta } from "../models/index.js";
 
 // 📌 Función para calcular la edad a partir de la fecha de nacimiento
 const calcularEdad = (fechaNacimiento) => {
-  const hoy = new Date()
-  const fechaNac = new Date(fechaNacimiento)
-  let edad = hoy.getFullYear() - fechaNac.getFullYear()
-  const mes = hoy.getMonth() - fechaNac.getMonth()
+  const hoy = new Date();
+  const fechaNac = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
   if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
-    edad--
+    edad--;
   }
-  return edad
-}
+  return edad;
+};
 
 // 📌 Crear jugador
 export const crearJugador = async (req, res) => {
@@ -25,33 +26,34 @@ export const crearJugador = async (req, res) => {
       anos_experiencia_voley,
       correo_institucional,
       numero_celular,
-      cuentaId
-    } = req.body
+      cuentaId,
+      imagen, // opcional
+    } = req.body;
 
     // Validar fecha de nacimiento
     if (!fecha_nacimiento || isNaN(Date.parse(fecha_nacimiento))) {
       return res.status(400).json({
         success: false,
         message: "La fecha de nacimiento no es válida",
-      })
+      });
     }
 
-    const hoy = new Date()
-    const fechaNac = new Date(fecha_nacimiento)
+    const hoy = new Date();
+    const fechaNac = new Date(fecha_nacimiento);
     if (fechaNac > hoy) {
       return res.status(400).json({
         success: false,
         message: "La fecha de nacimiento no puede ser futura",
-      })
+      });
     }
 
     // Calcular edad y validar rango
-    const edad = calcularEdad(fecha_nacimiento)
+    const edad = calcularEdad(fecha_nacimiento);
     if (edad < 16 || edad > 35) {
       return res.status(400).json({
         success: false,
         message: "La edad debe estar entre 16 y 35 años",
-      })
+      });
     }
 
     // Crear jugador
@@ -65,25 +67,26 @@ export const crearJugador = async (req, res) => {
       anos_experiencia_voley,
       correo_institucional,
       numero_celular,
-      cuentaId
-    })
+      cuentaId,
+      imagen: imagen || null,
+    });
 
     res.status(201).json({
       success: true,
       message: "Jugador creado exitosamente",
       data: {
         ...nuevoJugador.toJSON(),
-        edad
-      }
-    })
+        edad,
+      },
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
       error: error.message,
-    })
+    });
   }
-}
+};
 
 // 📌 Obtener todos los jugadores
 export const obtenerJugadores = async (req, res) => {
@@ -96,30 +99,30 @@ export const obtenerJugadores = async (req, res) => {
           where: { activo: true },
         },
       ],
-    })
+    });
 
-    const jugadoresConEdad = jugadores.map(j => ({
+    const jugadoresConEdad = jugadores.map((j) => ({
       ...j.toJSON(),
-      edad: calcularEdad(j.fecha_nacimiento)
-    }))
+      edad: calcularEdad(j.fecha_nacimiento),
+    }));
 
     res.json({
       success: true,
       data: jugadoresConEdad,
-    })
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
       error: error.message,
-    })
+    });
   }
-}
+};
 
 // 📌 Obtener un jugador por ID
 export const obtenerJugador = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
 
     const jugador = await Jugador.findOne({
       where: { id },
@@ -130,42 +133,42 @@ export const obtenerJugador = async (req, res) => {
           where: { activo: true },
         },
       ],
-    })
+    });
 
     if (!jugador) {
       return res.status(404).json({
         success: false,
         message: "Jugador no encontrado",
-      })
+      });
     }
 
     if (req.usuario.rol === "jugador" && jugador.cuentaId !== req.usuario.id) {
       return res.status(403).json({
         success: false,
         message: "No tienes permisos para ver esta información",
-      })
+      });
     }
 
     res.json({
       success: true,
       data: {
         ...jugador.toJSON(),
-        edad: calcularEdad(jugador.fecha_nacimiento)
+        edad: calcularEdad(jugador.fecha_nacimiento),
       },
-    })
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
       error: error.message,
-    })
+    });
   }
-}
+};
 
 // 📌 Actualizar jugador
 export const actualizarJugador = async (req, res) => {
   try {
-    const { id } = req.params
+    const { id } = req.params;
 
     const jugador = await Jugador.findOne({
       where: { id },
@@ -176,20 +179,20 @@ export const actualizarJugador = async (req, res) => {
           where: { activo: true },
         },
       ],
-    })
+    });
 
     if (!jugador) {
       return res.status(404).json({
         success: false,
         message: "Jugador no encontrado",
-      })
+      });
     }
 
     if (req.usuario.rol === "jugador" && jugador.cuentaId !== req.usuario.id) {
       return res.status(403).json({
         success: false,
         message: "No tienes permisos para actualizar esta información",
-      })
+      });
     }
 
     if (req.body.fecha_nacimiento) {
@@ -197,92 +200,30 @@ export const actualizarJugador = async (req, res) => {
         return res.status(400).json({
           success: false,
           message: "La fecha de nacimiento no es válida",
-        })
+        });
       }
-      const edad = calcularEdad(req.body.fecha_nacimiento)
-      if (edad < 16 || edad > 35) {
+      const nuevaEdad = calcularEdad(req.body.fecha_nacimiento);
+      if (nuevaEdad < 16 || nuevaEdad > 35) {
         return res.status(400).json({
           success: false,
           message: "La edad debe estar entre 16 y 35 años",
-        })
+        });
       }
     }
 
-    await jugador.update(req.body)
+    // Permitir cambiar imagen
+    const { imagen, ...otros } = req.body;
+    await jugador.update({ ...otros, imagen: imagen !== undefined ? imagen : jugador.imagen });
 
     res.json({
       success: true,
       message: "Jugador actualizado exitosamente",
       data: {
         ...jugador.toJSON(),
-        edad: calcularEdad(jugador.fecha_nacimiento)
+        edad: calcularEdad(jugador.fecha_nacimiento),
       },
-    })
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error interno del servidor",
-      error: error.message,
-    })
-  }
-}
-export const actualizarPerfil = async (req, res) => {
-  const transaction = await sequelize.transaction();
-
-  try {
-    const { id } = req.params;
-    const { usuario, ...datosPersonales } = req.body;
-
-    const cuenta = await Cuenta.findByPk(id, { transaction });
-
-    if (!cuenta || !cuenta.activo) {
-      await transaction.rollback();
-      return res.status(404).json({
-        success: false,
-        message: "Cuenta no encontrada",
-      });
-    }
-
-    // Actualizar solo usuario (no contraseña)
-    if (usuario) {
-      await cuenta.update({ usuario }, { transaction });
-    }
-
-    // Actualizar datos personales según rol
-    const modeloMap = {
-      jugador: Jugador,
-      entrenador: Entrenador,
-      tecnico: Tecnico,
-    };
-
-    const Modelo = modeloMap[cuenta.rol];
-    if (Modelo && Object.keys(datosPersonales).length > 0) {
-      await Modelo.update(datosPersonales, {
-        where: { cuentaId: cuenta.id },
-        transaction,
-      });
-    }
-
-    await transaction.commit();
-
-    // Retornar perfil actualizado sin contraseña
-    const perfilActualizado = await Cuenta.findOne({
-      where: { id: cuenta.id, activo: true },
-      attributes: { exclude: ["contraseña"] },
-      include: [
-        { model: Jugador, as: "jugador" },
-        { model: Entrenador, as: "entrenador" },
-        { model: Tecnico, as: "tecnico" },
-      ],
-    });
-
-    res.json({
-      success: true,
-      message: "Perfil actualizado exitosamente",
-      data: perfilActualizado,
     });
   } catch (error) {
-    await transaction.rollback();
     res.status(500).json({
       success: false,
       message: "Error interno del servidor",
