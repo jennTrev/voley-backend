@@ -44,10 +44,10 @@ export const Entrenador = sequelize.define(
       unique: true,
       validate: { isEmail: true },
     },
-    imagen: {
-      type: DataTypes.BYTEA, // ✅ corregido para PostgreSQL
-      allowNull: true,
-    },
+      imagen: {
+    type: DataTypes.BLOB, // Sequelize lo convierte en BYTEA automáticamente
+    allowNull: true,
+  },
     cuentaId: {
       type: DataTypes.INTEGER,
       allowNull: false,
