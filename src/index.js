@@ -29,8 +29,10 @@ app.use(helmet());
 app.use(cors());
 
 // Middlewares de parsing
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middlewares de parsing con límite aumentado para imágenes base64
+app.use(express.json({ limit: "10mb" })); // puedes subir a "20mb" si lo necesitas
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
 
 // Middleware de logging en desarrollo
 if (process.env.NODE_ENV === "development") {
