@@ -6,7 +6,7 @@ import {
   obtenerHorario,
   actualizarHorario,
   eliminarHorario
-} from "../controllers/horarioController.js";
+} from "../controllers/HorarioController";
 
 const router = express.Router();
 
