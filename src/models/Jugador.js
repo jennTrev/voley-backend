@@ -65,7 +65,7 @@ export const Jugador = sequelize.define(
       validate: { len: [8, 15], isNumeric: true },
     },
     imagen: {
-      type: DataTypes.BLOB("long"),
+      type: DataTypes.BYTEA, // ✅ corregido para PostgreSQL
       allowNull: true,
     },
     cuentaId: {

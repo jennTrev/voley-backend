@@ -45,7 +45,7 @@ export const Entrenador = sequelize.define(
       validate: { isEmail: true },
     },
     imagen: {
-      type: DataTypes.BLOB("long"),
+      type: DataTypes.BYTEA, // ✅ corregido para PostgreSQL
       allowNull: true,
     },
     cuentaId: {
