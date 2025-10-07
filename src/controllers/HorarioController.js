@@ -61,7 +61,7 @@ export const actualizarHorario = async (req, res) => {
     res.status(400).json({ success: false, message: "Error al actualizar horario", error: error.message });
   }
 };
-
+//CAMBIO PARA QUE RECONOXCA
 // Eliminar un horario
 export const eliminarHorario = async (req, res) => {
   try {
