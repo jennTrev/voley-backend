@@ -1,6 +1,6 @@
 // models/Jugador.js
-import { DataTypes } from "sequelize";
-import { sequelize } from "../config/database.js";
+import { DataTypes } from "sequelize"
+import { sequelize } from "../config/database.js"
 
 export const Jugador = sequelize.define(
   "jugadores",
@@ -26,13 +26,7 @@ export const Jugador = sequelize.define(
       validate: { len: [2, 100] },
     },
     posicion_principal: {
-      type: DataTypes.ENUM(
-        "armador",
-        "opuesto",
-        "central",
-        "receptor",
-        "libero"
-      ),
+      type: DataTypes.ENUM("armador", "opuesto", "central", "receptor", "libero"),
       allowNull: false,
     },
     fecha_nacimiento: {
@@ -65,7 +59,7 @@ export const Jugador = sequelize.define(
       validate: { len: [8, 15], isNumeric: true },
     },
     imagen: {
-      type: DataTypes.BLOB, // Sequelize lo convierte en BYTEA automáticamente
+      type: DataTypes.BLOB,
       allowNull: true,
     },
     cuentaId: {
@@ -77,5 +71,16 @@ export const Jugador = sequelize.define(
   {
     tableName: "jugadores",
     timestamps: false,
+  },
+)
+
+Jugador.prototype.toJSON = function () {
+  const values = { ...this.get() }
+
+  // Convertir imagen principal a base64 si existe
+  if (values.imagen && Buffer.isBuffer(values.imagen)) {
+    values.imagen = `data:image/jpeg;base64,${values.imagen.toString("base64")}`
   }
-);
+
+  return values
+}
